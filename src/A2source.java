@@ -1,4 +1,3 @@
-
 // Source code for semaphore class:  
 
 class Semaphore 
@@ -14,6 +13,7 @@ class Semaphore
          }
         public synchronized void Wait()
         {
+        		this.value--;
                   while (this.value <= 0)
                   {
                          try
@@ -26,7 +26,6 @@ class Semaphore
                                  e.printStackTrace();
                             }
                     }
-                    this.value--;    
            }
            public synchronized void Signal()
            {
@@ -322,5 +321,4 @@ public class CharStackInvalidAceessException extends Exception
 {
            // Fill it up yourself
 }
-
 
