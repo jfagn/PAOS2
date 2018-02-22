@@ -5,10 +5,12 @@ public class Semaphore {
     {
              this.value = value;
     }
+    
    public Semaphore()
    {
             this(0);
     }
+   
    public synchronized void Wait()
    {
    		this.value--;
@@ -25,6 +27,7 @@ public class Semaphore {
                        }
                }
       }
+   
       public synchronized void Signal()
       {
               ++this.value;

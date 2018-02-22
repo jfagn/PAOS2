@@ -11,8 +11,8 @@ public class StackManager
            private static final int NUM_PROBERS = 1; // Number of threads dumping stack
            private static int iThreadSteps = 3; // Number of steps they take
           // Semaphore declarations. Insert your code in the following:
-          //...
-          //...
+          private static Semaphore semStack = new Semaphore(1);
+          
           // The main()
           public static void main(String[] argv)
           {
@@ -91,8 +91,16 @@ public class StackManager
                               System.out.println ("Consumer thread [TID=" + this.iTID + "] starts executing.");
                               for (int i = 0; i < StackManager.iThreadSteps; i++)  {
                                        // Insert your code in the following:
-                                     // ...
-                                     // ...
+	                            	  semStack.Wait();
+	                                  try {
+	                                  	this.copy = CharStack.pop();
+	                                  } catch(CharStackEmptyException e) {
+	                                      System.out.println("Caught exception: StackCharEmptyException");
+	                                      System.out.println("Message : " + e.getMessage());
+	                                      System.out.println("Stack Trace : ");
+	                                      e.printStackTrace();
+	                                  }
+	                                  semStack.Signal();
                                       System.out.println("Consumer thread [TID=" + this.iTID + "] pops character =" + this.copy);
                               }
                               System.out.println ("Consumer thread [TID=" + this.iTID + "] terminates.");
@@ -109,9 +117,23 @@ public class StackManager
                                 System.out.println ("Producer thread [TID=" + this.iTID + "] starts executing.");
                                 for (int i = 0; i < StackManager.iThreadSteps; i++)  {
                                          // Insert your code in the following:
-                                        // ...
-                                        //...
-                                System.out.println("Producer thread [TID=" + this.iTID + "] pushes character =" + this.block);
+                                		semStack.Wait();
+                                        try {
+                                        	this.block = (char) (CharStack.pick()+1);
+                                        	CharStack.push(this.block);
+                                        } catch (CharStackFullException e) {
+                                        	System.out.println("Caught exception: CharStackFullException");
+                                            System.out.println("Message : " + e.getMessage());
+                                            System.out.println("Stack Trace : ");
+                                            e.printStackTrace();
+                                        } catch(CharStackEmptyException e) {
+                                            System.out.println("Caught exception: StackCharEmptyException");
+                                            System.out.println("Message : " + e.getMessage());
+                                            System.out.println("Stack Trace : ");
+                                            e.printStackTrace();
+                                        }
+                                        semStack.Signal();
+                                        System.out.println("Producer thread [TID=" + this.iTID + "] pushes character =" + this.block);
                                 }
                                System.out.println("Producer thread [TID=" + this.iTID + "] terminates.");
                      }
@@ -126,10 +148,26 @@ public class StackManager
                                System.out.println("CharStackProber thread [TID=" + this.iTID + "] starts executing.");
                                for (int i = 0; i < 2 * StackManager.iThreadSteps; i++)
                                {
-                                        // Insert your code in the following. Note that the stack state must be
-                                        // printed in the required format.
-                                       // ...
-                                       // ...
+                                   // Insert your code in the following. Note that the stack state must be
+                                   // printed in the required format.
+                                      
+                            	   semStack.Wait();
+                            	   try {
+                            		   System.out.print("Stack S = (");
+                            		   for (int j = 0; j < stack.getSize();j++) {
+	                            		   System.out.print("[" + stack.getAt(j) + "]");
+	                            		   if (j != stack.getSize()-1) {
+	                            			   System.out.print(",");
+	                            		   }
+	                            	   }
+                            		   System.out.print(")\n");
+                            	   } catch(CharStackInvalidAceessException e) {
+                                       System.out.println("Caught exception: CharStackInvalidAceessException");
+                                       System.out.println("Message : " + e.getMessage());
+                                       System.out.println("Stack Trace : ");
+                                       e.printStackTrace();
+                                   }
+                            	   semStack.Signal();
                                }
                      }
            } // class CharStackProber
