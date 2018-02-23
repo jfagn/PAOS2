@@ -1,7 +1,12 @@
 // Source code for stack manager:
 
 // Our own exceptions
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+
 import CharStackExceptions.*;
+
 
 public class StackManager
 {
@@ -14,14 +19,16 @@ public class StackManager
           private static Semaphore semStack = new Semaphore(1);
           
           // The main()
-          public static void main(String[] argv)
+          public static void main(String[] argv) throws FileNotFoundException
           {
+        	  PrintStream out = new PrintStream(new FileOutputStream("Output_1.txt"));
+        	  System.setOut(out);
                     // Some initial stats...
                     try
                     {
                               System.out.println("Main thread starts executing.");
                               System.out.println("Initial value of top = " + stack.getTop() + ".");
-                              System.out.println("Initial value of stack top = " + stack.pick() + ".");
+                              System.out.println("Initial value of stack top = " + CharStack.pick() + ".");
                               System.out.println("Main thread will now fork several threads.");
                     }
                     catch(CharStackEmptyException e)
@@ -63,7 +70,7 @@ public class StackManager
                           // Some final stats after all the child threads terminated...
                           System.out.println("System terminates normally.");
                           System.out.println("Final value of top = " + stack.getTop() + ".");
-                          System.out.println("Final value of stack top = " + stack.pick() + ".");
+                          System.out.println("Final value of stack top = " + CharStack.pick() + ".");
                           System.out.println("Final value of stack top-1 = " + stack.getAt(stack.getTop() - 1) + ".");
                           System.out.println("Stack access count = " + stack.getAccessCounter());
                 }
@@ -79,6 +86,7 @@ public class StackManager
                           System.out.println("Stack Trace : ");
                           e.printStackTrace();
                }
+                out.close();
         } // main()
         /*
         * Inner Consumer thread class
@@ -94,14 +102,19 @@ public class StackManager
 	                            	  semStack.Wait();
 	                                  try {
 	                                  	this.copy = CharStack.pop();
-	                                  } catch(CharStackEmptyException e) {
+	                                  } catch (CharStackExceptions.CharStackEmptyException e) {
 	                                      System.out.println("Caught exception: StackCharEmptyException");
 	                                      System.out.println("Message : " + e.getMessage());
 	                                      System.out.println("Stack Trace : ");
 	                                      e.printStackTrace();
+	                                  } catch (Exception e) {
+	                                      System.out.println("Caught exception: " + e.getClass().getName());
+	                                      System.out.println("Message : " + e.getMessage());
+	                                     System.out.println("Stack Trace : ");
+	                                     e.printStackTrace();
 	                                  }
-	                                  semStack.Signal();
                                       System.out.println("Consumer thread [TID=" + this.iTID + "] pops character =" + this.copy);
+                                      semStack.Signal();
                               }
                               System.out.println ("Consumer thread [TID=" + this.iTID + "] terminates.");
                      }
@@ -121,19 +134,26 @@ public class StackManager
                                         try {
                                         	this.block = (char) (CharStack.pick()+1);
                                         	CharStack.push(this.block);
-                                        } catch (CharStackFullException e) {
-                                        	System.out.println("Caught exception: CharStackFullException");
-                                            System.out.println("Message : " + e.getMessage());
-                                            System.out.println("Stack Trace : ");
-                                            e.printStackTrace();
-                                        } catch(CharStackEmptyException e) {
+                                        } catch (CharStackExceptions.CharStackEmptyException e) {
                                             System.out.println("Caught exception: StackCharEmptyException");
                                             System.out.println("Message : " + e.getMessage());
                                             System.out.println("Stack Trace : ");
                                             e.printStackTrace();
+                                        } catch (CharStackExceptions.CharStackFullException e) {
+                                        	System.out.println("Caught exception: CharStackFullException");
+                                            System.out.println("Message : " + e.getMessage());
+                                            System.out.println("Stack Trace : ");
+                                            e.printStackTrace();
+                                        } catch(Exception e)
+                                        {
+                                            System.out.println("Caught exception: " + e.getClass().getName());
+                                            System.out.println("Message : " + e.getMessage());
+                                           System.out.println("Stack Trace : ");
+                                           e.printStackTrace();
                                         }
-                                        semStack.Signal();
+                                        
                                         System.out.println("Producer thread [TID=" + this.iTID + "] pushes character =" + this.block);
+                                        semStack.Signal();
                                 }
                                System.out.println("Producer thread [TID=" + this.iTID + "] terminates.");
                      }
@@ -153,20 +173,22 @@ public class StackManager
                                       
                             	   semStack.Wait();
                             	   try {
-                            		   System.out.print("Stack S = (");
+                            		   String stackContent;
+                            		   stackContent = "Stack S = (";
                             		   for (int j = 0; j < stack.getSize();j++) {
-	                            		   System.out.print("[" + stack.getAt(j) + "]");
-	                            		   if (j != stack.getSize()-1) {
-	                            			   System.out.print(",");
-	                            		   }
+                            			   stackContent = stackContent + "[" + stack.getAt(j) + "]";
+	                            		   if (j != stack.getSize()-1) 
+	                            			   stackContent = stackContent + ",";
+	                            		   
 	                            	   }
-                            		   System.out.print(")\n");
-                            	   } catch(CharStackInvalidAceessException e) {
+                            		   stackContent = stackContent + ")";
+                            		   System.out.println(stackContent);
+                            	   } catch (CharStackExceptions.CharStackInvalidAceessException e) {
                                        System.out.println("Caught exception: CharStackInvalidAceessException");
                                        System.out.println("Message : " + e.getMessage());
                                        System.out.println("Stack Trace : ");
                                        e.printStackTrace();
-                                   }
+                                   } 
                             	   semStack.Signal();
                                }
                      }
