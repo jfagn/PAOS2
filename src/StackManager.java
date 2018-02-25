@@ -3,7 +3,10 @@
 // Our own exceptions
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 
 import CharStackExceptions.*;
 
@@ -17,12 +20,14 @@ public class StackManager
            private static int iThreadSteps = 3; // Number of steps they take
           // Semaphore declarations. Insert your code in the following:
           private static Semaphore semStack = new Semaphore(1);
+          private static Semaphore semProd = new Semaphore(0);
+          private static Semaphore semConsum = new Semaphore(0);
           
           // The main()
           public static void main(String[] argv) throws FileNotFoundException
           {
-        	  PrintStream out = new PrintStream(new FileOutputStream("Output_1.txt"));
-        	  System.setOut(out);
+        	  
+        	  
                     // Some initial stats...
                     try
                     {
@@ -86,7 +91,7 @@ public class StackManager
                           System.out.println("Stack Trace : ");
                           e.printStackTrace();
                }
-                out.close();
+                
         } // main()
         /*
         * Inner Consumer thread class
@@ -99,7 +104,8 @@ public class StackManager
                               System.out.println ("Consumer thread [TID=" + this.iTID + "] starts executing.");
                               for (int i = 0; i < StackManager.iThreadSteps; i++)  {
                                        // Insert your code in the following:
-	                            	  semStack.Wait();
+                            	  semConsum.Wait();
+                            	  semStack.Wait();
 	                                  try {
 	                                  	this.copy = CharStack.pop();
 	                                  } catch (CharStackExceptions.CharStackEmptyException e) {
@@ -115,6 +121,7 @@ public class StackManager
 	                                  }
                                       System.out.println("Consumer thread [TID=" + this.iTID + "] pops character =" + this.copy);
                                       semStack.Signal();
+                                      semConsum.Signal();
                               }
                               System.out.println ("Consumer thread [TID=" + this.iTID + "] terminates.");
                      }
@@ -156,6 +163,12 @@ public class StackManager
                                         semStack.Signal();
                                 }
                                System.out.println("Producer thread [TID=" + this.iTID + "] terminates.");
+                               
+                               if (!semProd.available) {
+                            	   semProd.Signal();
+                               } else {
+                            	   semConsum.Signal();
+                               }
                      }
           } // class Producer
             /*
@@ -165,6 +178,14 @@ public class StackManager
            {
                      public void run()
                      {
+                    	 
+                    	/* PrintWriter output = null;
+						try {
+							output = new PrintWriter(new FileWriter("Grep_3.txt"));
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}*/
                                System.out.println("CharStackProber thread [TID=" + this.iTID + "] starts executing.");
                                for (int i = 0; i < 2 * StackManager.iThreadSteps; i++)
                                {
@@ -191,6 +212,7 @@ public class StackManager
                                    } 
                             	   semStack.Signal();
                                }
+                               //output.close();
                      }
            } // class CharStackProber
 } // class StackManager

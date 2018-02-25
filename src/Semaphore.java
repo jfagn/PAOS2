@@ -1,7 +1,7 @@
 // Source code for semaphore class:  
 public class Semaphore {
     private int value;
-    private boolean available;
+    public boolean available;
     
     public Semaphore(int value)
     {
