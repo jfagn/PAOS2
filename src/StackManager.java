@@ -164,7 +164,7 @@ public class StackManager
                                 }
                                System.out.println("Producer thread [TID=" + this.iTID + "] terminates.");
                                
-                               if (semProd.value == 0) {
+                               if (!semProd.available) {
                             	   semProd.Signal();
                                } else {
                             	   semConsum.Signal();

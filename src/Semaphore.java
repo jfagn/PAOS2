@@ -1,13 +1,16 @@
 // Source code for semaphore class:  
 public class Semaphore {
-    public int value;
-
+    private int value;
+    public boolean available;
+    
     public Semaphore(int value)
     {
     	if (value <= 0) {
     		this.value = 0;
+    		this.available = false;
     	}else {
              this.value = value;
+             this.available = true;
     	}
     }
     
@@ -19,7 +22,7 @@ public class Semaphore {
    public synchronized void Wait()
    {
 	   this.value--;
-             if (this.value < 0)
+             while (!this.available)
              {
                     try
                    {
@@ -31,11 +34,16 @@ public class Semaphore {
                             e.printStackTrace();
                        }
                }
+             if (this.value <= 0) {
+            	 this.available = false;
+             }
+             
       }
    
       public synchronized void Signal()
       {
               ++this.value;
+              this.available = true;
               notify();
       }
       public synchronized void P()
