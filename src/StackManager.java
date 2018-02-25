@@ -108,7 +108,7 @@ public class StackManager
                             	  semStack.Wait();
 	                                  try {
 	                                  	this.copy = CharStack.pop();
-	                                  } catch (CharStackExceptions.CharStackEmptyException e) {
+	                                  } catch (CharStackEmptyException e) {
 	                                      System.out.println("Caught exception: StackCharEmptyException");
 	                                      System.out.println("Message : " + e.getMessage());
 	                                      System.out.println("Stack Trace : ");
@@ -141,12 +141,12 @@ public class StackManager
                                         try {
                                         	this.block = (char) (CharStack.pick()+1);
                                         	CharStack.push(this.block);
-                                        } catch (CharStackExceptions.CharStackEmptyException e) {
+                                        } catch (CharStackEmptyException e) {
                                             System.out.println("Caught exception: StackCharEmptyException");
                                             System.out.println("Message : " + e.getMessage());
                                             System.out.println("Stack Trace : ");
                                             e.printStackTrace();
-                                        } catch (CharStackExceptions.CharStackFullException e) {
+                                        } catch (CharStackFullException e) {
                                         	System.out.println("Caught exception: CharStackFullException");
                                             System.out.println("Message : " + e.getMessage());
                                             System.out.println("Stack Trace : ");
@@ -164,7 +164,7 @@ public class StackManager
                                 }
                                System.out.println("Producer thread [TID=" + this.iTID + "] terminates.");
                                
-                               if (!semProd.available) {
+                               if (semProd.value == 0) {
                             	   semProd.Signal();
                                } else {
                             	   semConsum.Signal();
@@ -204,12 +204,18 @@ public class StackManager
 	                            	   }
                             		   stackContent = stackContent + ")";
                             		   System.out.println(stackContent);
-                            	   } catch (CharStackExceptions.CharStackInvalidAceessException e) {
+                            	   } catch (CharStackInvalidAceessException e) {
                                        System.out.println("Caught exception: CharStackInvalidAceessException");
                                        System.out.println("Message : " + e.getMessage());
                                        System.out.println("Stack Trace : ");
                                        e.printStackTrace();
-                                   } 
+                                   } catch(Exception e)
+                                   {
+                                       System.out.println("Caught exception: " + e.getClass().getName());
+                                       System.out.println("Message : " + e.getMessage());
+                                      System.out.println("Stack Trace : ");
+                                      e.printStackTrace();
+                                   }
                             	   semStack.Signal();
                                }
                                //output.close();
